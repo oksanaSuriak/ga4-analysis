@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GA4 Dashboards</title>
+  <style>
+    :root { color-scheme: light; --bg: #f5f7fb; --panel: #ffffff; --text: #172033; --muted: #667085; --line: #d9e0ea; --accent: #2563eb; --accent-soft: #e8f0ff; --shadow: 0 18px 45px rgba(23, 32, 51, 0.10); }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); font-family: "Segoe UI", Arial, sans-serif; }
+    header { border-bottom: 1px solid var(--line); background: var(--panel); }
+    .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 0; }
+    h1 { margin: 0; font-size: 24px; line-height: 1.2; letter-spacing: 0; }
+    .subtitle { margin-top: 5px; color: var(--muted); font-size: 14px; }
+    .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    select, .file-button { height: 40px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--text); font: inherit; }
+    select { min-width: 260px; padding: 0 36px 0 12px; }
+    .file-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; cursor: pointer; color: var(--accent); background: var(--accent-soft); border-color: #c7d7fe; font-weight: 600; }
+    .file-button input { position: absolute; inline-size: 1px; block-size: 1px; opacity: 0; pointer-events: none; }
+    main { padding: 26px 0 36px; }
+    .viewer { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: var(--shadow); }
+    .viewer-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+    .viewer-title { font-size: 17px; font-weight: 700; }
+    .viewer-note { color: var(--muted); font-size: 13px; text-align: right; }
+    .frame-wrap { min-height: 520px; padding: 18px; background: #eef2f7; }
+    iframe { display: block; width: 100%; min-height: 680px; border: 0; border-radius: 6px; background: #ffffff; }
+    .links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+    .link-card { display: block; padding: 14px 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--text); text-decoration: none; }
+    .link-card strong { display: block; margin-bottom: 4px; font-size: 15px; }
+    .link-card span { color: var(--muted); font-size: 13px; }
+    @media (max-width: 760px) { .topbar, .viewer-head { align-items: stretch; flex-direction: column; } .actions, .viewer-note { justify-content: stretch; text-align: left; } select, .file-button { width: 100%; } .links { grid-template-columns: 1fr; } iframe { min-height: 520px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell topbar">
+      <div>
+        <h1>GA4 Dashboards</h1>
+        <div class="subtitle">Локальна сторінка для перегляду прев’ю та файлів дашбордів</div>
+      </div>
+      <div class="actions">
+        <select id="dashboardSelect" aria-label="Вибір дашборду"></select>
+        <label class="file-button">Додати прев’ю<input id="fileInput" type="file" accept=".svg,.html,.htm,.png,.jpg,.jpeg,.webp,.pdf"></label>
+      </div>
+    </div>
+  </header>
+  <main class="shell">
+    <section class="viewer">
+      <div class="viewer-head"><div class="viewer-title" id="dashboardTitle">Dashboard</div><div class="viewer-note" id="dashboardNote">Preview</div></div>
+      <div class="frame-wrap"><iframe id="dashboardFrame" title="Dashboard preview"></iframe></div>
+    </section>
+    <div class="links">
+      <a class="link-card" href="ga4_acquisition_dashboard.twb"><strong>Tableau workbook</strong><span>ga4_acquisition_dashboard.twb</span></a>
+      <a class="link-card" href="ga4_channel_summary.csv"><strong>Aggregated data</strong><span>ga4_channel_summary.csv</span></a>
+      <a class="link-card" href="AGENTS.md"><strong>Project guide</strong><span>AGENTS.md</span></a>
+    </div>
+  </main>
+  <script>
+    const dashboards = [{ title: "GA4 Acquisition Dashboard", note: "2 KPI-картки та 2 візуалізації", src: "ga4_acquisition_dashboard_preview.svg" }];
+    const select = document.querySelector("#dashboardSelect");
+    const frame = document.querySelector("#dashboardFrame");
+    const title = document.querySelector("#dashboardTitle");
+    const note = document.querySelector("#dashboardNote");
+    const fileInput = document.querySelector("#fileInput");
+    function renderOptions() { select.innerHTML = ""; dashboards.forEach((dashboard, index) => { const option = document.createElement("option"); option.value = index; option.textContent = dashboard.title; select.appendChild(option); }); }
+    function showDashboard(index) { const dashboard = dashboards[index]; title.textContent = dashboard.title; note.textContent = dashboard.note; frame.src = dashboard.src; }
+    select.addEventListener("change", (event) => showDashboard(Number(event.target.value)));
+    fileInput.addEventListener("change", (event) => { const file = event.target.files[0]; if (!file) return; const url = URL.createObjectURL(file); dashboards.push({ title: file.name, note: "Тимчасове локальне прев’ю", src: url }); renderOptions(); select.value = dashboards.length - 1; showDashboard(dashboards.length - 1); });
+    renderOptions(); showDashboard(0);
+  </script>
+</body>
+</html>
